@@ -1,0 +1,44 @@
+{
+  "name": "@octadecimal/template-analyzer",
+  "version": "1.0.0",
+  "description": "AI-powered template analyzer for generating Strapi schemas and Cursor prompts",
+  "main": "dist/index.js",
+  "type": "module",
+  "bin": {
+    "template-analyzer": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "analyze": "node dist/cli.js analyze",
+    "generate-schema": "node dist/cli.js generate-schema",
+    "generate-prompt": "node dist/cli.js generate-prompt",
+    "test": "node dist/cli.js --help"
+  },
+  "keywords": [
+    "ai",
+    "template",
+    "analyzer",
+    "strapi",
+    "cursor",
+    "anthropic",
+    "claude"
+  ],
+  "author": "Octadecimal Studio",
+  "license": "MIT",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
+    "commander": "^12.1.0",
+    "cheerio": "^1.0.0",
+    "node-fetch": "^3.3.2",
+    "chalk": "^5.3.0",
+    "ora": "^8.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
