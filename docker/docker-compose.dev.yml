@@ -1,0 +1,51 @@
+# Octadecimal Studio - Docker Compose (Development Override)
+# Nadpisuje ustawienia z docker-compose.yml dla środowiska deweloperskiego
+# Użycie: docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+
+services:
+  app:
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - XDEBUG_MODE=debug,develop
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  nginx:
+    ports:
+      - "8080:80"
+
+  mysql:
+    ports:
+      - "3307:3306"
+
+  redis:
+    ports:
+      - "6380:6379"
+
+  # Mailpit do przechwytywania emaili w dev
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: octadecimal_mailpit
+    restart: unless-stopped
+    ports:
+      - "8025:8025"  # UI
+      - "1025:1025"  # SMTP
+    networks:
+      - octadecimal
+
+  # PHPMyAdmin dla łatwego dostępu do bazy
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: octadecimal_phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      - PMA_HOST=mysql
+      - PMA_USER=${DB_USERNAME:-octadecimal}
+      - PMA_PASSWORD=${DB_PASSWORD:-secret}
+    networks:
+      - octadecimal
+    depends_on:
+      - mysql

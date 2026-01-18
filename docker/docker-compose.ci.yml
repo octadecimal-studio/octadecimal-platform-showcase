@@ -1,0 +1,60 @@
+# Octadecimal Studio - Docker Compose (CI/CD Testing)
+# Zoptymalizowane dla szybkich testów w CI
+# Użycie: docker compose -f docker-compose.ci.yml up -d
+
+services:
+  app:
+    build:
+      context: ./php
+      dockerfile: Dockerfile
+    container_name: octadecimal_app_ci
+    working_dir: /var/www/html
+    volumes:
+      - ../src:/var/www/html
+    networks:
+      - octadecimal_ci
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      - APP_ENV=testing
+      - APP_DEBUG=true
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=octadecimal_testing
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - CACHE_DRIVER=array
+      - SESSION_DRIVER=array
+      - QUEUE_CONNECTION=sync
+
+  mysql:
+    image: mysql:8.0
+    container_name: octadecimal_mysql_ci
+    tmpfs:
+      - /var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: octadecimal_testing
+      MYSQL_USER: octadecimal
+      MYSQL_PASSWORD: secret
+    networks:
+      - octadecimal_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p<DB_PASSWORD>"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
+  redis:
+    image: redis:alpine
+    container_name: octadecimal_redis_ci
+    networks:
+      - octadecimal_ci
+
+networks:
+  octadecimal_ci:
+    driver: bridge
