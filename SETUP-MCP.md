@@ -10,7 +10,7 @@
    - `repo` (Full control)
    - `admin:org` (dla fork management)
    - `workflow` (dla GitHub Actions)
-6. Skopiuj token
+6. Skopiuj token (NIGDY nie commituj tokena do repo!)
 
 ## Krok 2: Dodaj do ~/.cursor/mcp.json
 
