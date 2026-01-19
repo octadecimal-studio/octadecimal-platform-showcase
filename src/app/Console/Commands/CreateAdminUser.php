@@ -87,7 +87,7 @@ class CreateAdminUser extends Command
             $tenant = Tenant::where('slug', $tenantSlug)->where('is_active', true)->first();
 
             if (! $tenant) {
-                $this->error("Tenant '{$tenantSlug}' nie istnieje lub jest nieaktywny");
+                $this->error('Tenant \'' . (string) $tenantSlug . '\' nie istnieje lub jest nieaktywny');
                 $this->info('Dostępne tenanty:');
 
                 foreach (Tenant::where('is_active', true)->get() as $t) {

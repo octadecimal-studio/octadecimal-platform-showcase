@@ -40,11 +40,16 @@ use Spatie\Permission\Traits\HasRoles;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read Tenant|null $tenant
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder<static> where($column, $operator = null, $value = null, $boolean = 'and')
+ * @method static \Illuminate\Database\Eloquent\Builder<static> query()
+ * @method static static create(array $attributes = [])
  */
 class User extends Authenticatable implements FilamentUser, HasTenants, MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasApiTokens;
+    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory;
     use HasRoles;
     use HasUuids;
@@ -133,7 +138,7 @@ class User extends Authenticatable implements FilamentUser, HasTenants, MustVeri
         }
 
         // Sprawdź czy tenant jest aktywny
-        return $this->tenant?->is_active ?? false;
+        return $this->tenant !== null && $this->tenant->is_active;
     }
 
     /**
@@ -221,7 +226,7 @@ class User extends Authenticatable implements FilamentUser, HasTenants, MustVeri
      * @param \Illuminate\Database\Eloquent\Builder<static> $query
      * @return \Illuminate\Database\Eloquent\Builder<static>
      */
-    public function scopeWithTenant($query)
+    public function scopeWithTenant(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
     {
         return $query->whereNotNull('tenant_id');
     }

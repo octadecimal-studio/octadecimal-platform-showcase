@@ -27,9 +27,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read \Illuminate\Database\Eloquent\Collection<int, User> $users
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder<static> where($column, $operator = null, $value = null, $boolean = 'and')
+ * @method static \Illuminate\Database\Eloquent\Builder<static> query()
+ *
+ * @use HasFactory<\Database\Factories\TenantFactory>
  */
 final class Tenant extends Model
 {
+    /** @use HasFactory<\Database\Factories\TenantFactory> */
     use HasFactory;
     use HasUuids;
     use SoftDeletes;
