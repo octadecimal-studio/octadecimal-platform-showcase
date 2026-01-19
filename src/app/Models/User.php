@@ -48,8 +48,10 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable implements FilamentUser, HasTenants, MustVerifyEmail
 {
     use HasApiTokens;
+
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory;
+
     use HasRoles;
     use HasUuids;
     use Notifiable;
@@ -209,7 +211,7 @@ class User extends Authenticatable implements FilamentUser, HasTenants, MustVeri
      * Używaj tego scope do ręcznego filtrowania użytkowników:
      * User::forTenant($tenant)->get()
      *
-     * @param \Illuminate\Database\Eloquent\Builder<static> $query
+     * @param  \Illuminate\Database\Eloquent\Builder<static>  $query
      * @return \Illuminate\Database\Eloquent\Builder<static>
      */
     public function scopeForTenant($query, Tenant|string $tenant)
@@ -222,7 +224,7 @@ class User extends Authenticatable implements FilamentUser, HasTenants, MustVeri
     /**
      * Scope: Tylko użytkownicy z przypisanym tenantem (bez super adminów).
      *
-     * @param \Illuminate\Database\Eloquent\Builder<static> $query
+     * @param  \Illuminate\Database\Eloquent\Builder<static>  $query
      * @return \Illuminate\Database\Eloquent\Builder<static>
      */
     public function scopeWithTenant(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
@@ -234,7 +236,7 @@ class User extends Authenticatable implements FilamentUser, HasTenants, MustVeri
     /**
      * Scope: Tylko super admini.
      *
-     * @param \Illuminate\Database\Eloquent\Builder<static> $query
+     * @param  \Illuminate\Database\Eloquent\Builder<static>  $query
      * @return \Illuminate\Database\Eloquent\Builder<static>
      */
     public function scopeSuperAdmins($query)

@@ -118,7 +118,7 @@ class BelongsToTenantTest extends TestCase
         app()->instance('current_tenant', $inactiveTenant);
 
         // TenantScope powinien zwrócić null dla nieaktywnego tenanta
-        $scope = new TenantScope();
+        $scope = new TenantScope;
 
         // Reflection to test private method
         $method = new \ReflectionMethod($scope, 'getCurrentTenant');
@@ -152,7 +152,7 @@ class BelongsToTenantTest extends TestCase
         \Illuminate\Support\Facades\Auth::logout();
 
         // TenantScope powinien zwrócić null (brak kontekstu)
-        $scope = new TenantScope();
+        $scope = new TenantScope;
         $method = new \ReflectionMethod($scope, 'getCurrentTenant');
         $method->setAccessible(true);
 

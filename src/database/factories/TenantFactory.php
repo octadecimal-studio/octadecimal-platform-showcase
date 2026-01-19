@@ -33,7 +33,7 @@ class TenantFactory extends Factory
 
         return [
             'name' => $name,
-            'slug' => Str::slug($name) . '-' . Str::random(5),
+            'slug' => Str::slug($name).'-'.Str::random(5),
             'domain' => null,
             'plan' => fake()->randomElement(['starter', 'pro', 'enterprise']),
             'database_type' => 'shared',
@@ -87,7 +87,7 @@ class TenantFactory extends Factory
             return [
                 'plan' => 'enterprise',
                 'database_type' => 'dedicated',
-                'database_name' => 'tenant_' . Str::slug($slug),
+                'database_name' => 'tenant_'.Str::slug($slug),
             ];
         });
     }

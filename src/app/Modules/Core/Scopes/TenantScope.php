@@ -35,7 +35,7 @@ final class TenantScope implements Scope
      * Aby wykonać zapytanie bez filtrowania po tenancie (np. dla super admina),
      * użyj: Model::withoutGlobalScope(TenantScope::class)->get()
      *
-     * @param Builder<Model> $builder
+     * @param  Builder<Model>  $builder
      */
     public function apply(Builder $builder, Model $model): void
     {
@@ -43,7 +43,7 @@ final class TenantScope implements Scope
 
         if ($tenant !== null) {
             // Filtruj po aktywnym tenancie
-            $builder->where($model->getTable() . '.tenant_id', $tenant->id);
+            $builder->where($model->getTable().'.tenant_id', $tenant->id);
         } else {
             // FAIL-CLOSED: Brak kontekstu tenanta = brak wyników
             // Zapobiega przypadkowemu zwróceniu wszystkich rekordów

@@ -21,13 +21,13 @@ trait CreatesTestUsers
     protected function createUserForTenant(Tenant $tenant, array $attributes = []): User
     {
         // Zachowaj email_verified_at z domyślnych ustawień jeśli nie podano jawnie
-        $emailVerified = array_key_exists('email_verified_at', $attributes) 
+        $emailVerified = array_key_exists('email_verified_at', $attributes)
             ? $attributes['email_verified_at']
             : now();
 
         $defaults = [
             'name' => 'Test User',
-            'email' => 'test' . uniqid() . '@example.com',
+            'email' => 'test'.uniqid().'@example.com',
             'password' => 'password',
         ];
 
@@ -49,7 +49,7 @@ trait CreatesTestUsers
     {
         $user = User::create(array_merge([
             'name' => 'Super Admin',
-            'email' => 'admin' . uniqid() . '@example.com',
+            'email' => 'admin'.uniqid().'@example.com',
             'password' => 'password',
             'email_verified_at' => now(),
         ], $attributes));
@@ -67,7 +67,7 @@ trait CreatesTestUsers
     {
         return User::create(array_merge([
             'name' => 'Test User',
-            'email' => 'test' . uniqid() . '@example.com',
+            'email' => 'test'.uniqid().'@example.com',
             'password' => 'password',
             'email_verified_at' => now(),
         ], $attributes));

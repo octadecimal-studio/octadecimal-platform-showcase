@@ -25,7 +25,7 @@ use Illuminate\Support\Facades\Auth;
  * @property-read Tenant|null $tenant
  *
  * @mixin Model
- * 
+ *
  * @phpstan-ignore-next-line trait.unused
  */
 trait BelongsToTenant
@@ -36,7 +36,7 @@ trait BelongsToTenant
     public static function bootBelongsToTenant(): void
     {
         // Dodaj Global Scope filtrujący po tenant_id
-        static::addGlobalScope(new TenantScope());
+        static::addGlobalScope(new TenantScope);
 
         // Automatycznie ustaw tenant_id przy tworzeniu
         static::creating(function (Model $model): void {
@@ -78,7 +78,7 @@ trait BelongsToTenant
     /**
      * Scope: Zapytanie dla konkretnego tenanta (bez global scope).
      *
-     * @param \Illuminate\Database\Eloquent\Builder<static> $query
+     * @param  \Illuminate\Database\Eloquent\Builder<static>  $query
      * @return \Illuminate\Database\Eloquent\Builder<static>
      */
     public function scopeForTenant($query, Tenant|string $tenant)

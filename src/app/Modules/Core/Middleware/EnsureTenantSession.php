@@ -27,7 +27,7 @@ final class EnsureTenantSession
     /**
      * Obsługuje przychodzące żądanie.
      *
-     * @param Closure(Request): Response $next
+     * @param  Closure(Request): Response  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -70,7 +70,7 @@ final class EnsureTenantSession
     /**
      * Próbuje rozpoznać tenanta na podstawie różnych źródeł.
      *
-     * @param mixed $user
+     * @param  mixed  $user
      */
     private function resolveTenant(Request $request, $user): ?Tenant
     {
@@ -120,7 +120,7 @@ final class EnsureTenantSession
     /**
      * Sprawdza czy użytkownik ma dostęp do tenanta.
      *
-     * @param mixed $user
+     * @param  mixed  $user
      */
     private function userCanAccessTenant($user, Tenant $tenant): bool
     {
@@ -148,7 +148,7 @@ final class EnsureTenantSession
     /**
      * Sprawdza czy użytkownik jest super adminem.
      *
-     * @param mixed $user
+     * @param  mixed  $user
      */
     private function isSuperAdmin($user): bool
     {

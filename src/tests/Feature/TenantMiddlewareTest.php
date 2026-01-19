@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
-use App\Models\User;
 use App\Modules\Core\Middleware\EnsureTenantSession;
 use App\Modules\Core\Models\Tenant;
 use Database\Seeders\RolesAndPermissionsSeeder;
@@ -45,7 +44,7 @@ class TenantMiddlewareTest extends TestCase
         $request = Request::create('/admin', 'GET');
         $request->setUserResolver(fn () => $user);
 
-        $middleware = new EnsureTenantSession();
+        $middleware = new EnsureTenantSession;
         $response = $middleware->handle($request, function ($req) use ($tenant) {
             // Sprawdź czy tenant jest ustawiony
             if (app()->bound('current_tenant')) {
@@ -77,7 +76,7 @@ class TenantMiddlewareTest extends TestCase
         $request = Request::create('/admin', 'GET');
         $request->setUserResolver(fn () => $user);
 
-        $middleware = new EnsureTenantSession();
+        $middleware = new EnsureTenantSession;
 
         $this->expectException(\Symfony\Component\HttpKernel\Exception\HttpException::class);
 
@@ -99,7 +98,7 @@ class TenantMiddlewareTest extends TestCase
         $request = Request::create('/admin', 'GET');
         $request->setUserResolver(fn () => $superAdmin);
 
-        $middleware = new EnsureTenantSession();
+        $middleware = new EnsureTenantSession;
         $response = $middleware->handle($request, function ($req) {
             return response('OK');
         });
@@ -119,7 +118,7 @@ class TenantMiddlewareTest extends TestCase
         $request = Request::create('/admin', 'GET');
         $request->setUserResolver(fn () => $user);
 
-        $middleware = new EnsureTenantSession();
+        $middleware = new EnsureTenantSession;
 
         $this->expectException(\Symfony\Component\HttpKernel\Exception\NotFoundHttpException::class);
 
@@ -142,7 +141,7 @@ class TenantMiddlewareTest extends TestCase
         // Request bez zalogowanego użytkownika, ale z domeną
         $request = Request::create('http://custom.example.com/admin/login', 'GET');
 
-        $middleware = new EnsureTenantSession();
+        $middleware = new EnsureTenantSession;
         $response = $middleware->handle($request, function ($req) use ($tenant) {
             // Sprawdź czy tenant jest ustawiony z domeny
             if (app()->bound('current_tenant')) {
@@ -182,7 +181,7 @@ class TenantMiddlewareTest extends TestCase
         $request = Request::create('/admin', 'GET');
         $request->setUserResolver(fn () => $user);
 
-        $middleware = new EnsureTenantSession();
+        $middleware = new EnsureTenantSession;
         $response = $middleware->handle($request, function ($req) use ($tenant1) {
             // Middleware powinien użyć tenant1 (z użytkownika), nie tenant2 (z sesji)
             if (app()->bound('current_tenant')) {

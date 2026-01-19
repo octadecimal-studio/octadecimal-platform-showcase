@@ -85,7 +85,7 @@ class CreateAdminUser extends Command
         $tenant = null;
         if ($tenantSlug) {
             assert(is_string($tenantSlug), 'Tenant slug must be a string');
-            
+
             $tenant = Tenant::where('slug', $tenantSlug)->where('is_active', true)->first();
 
             if (! $tenant) {
@@ -123,7 +123,7 @@ class CreateAdminUser extends Command
             $this->line('Tenant: brak (dostęp do wszystkich)');
         } else {
             assert($tenant !== null, 'Tenant must be set for tenant admin');
-            
+
             $user->tenant_id = $tenant->id;
             $user->save();
             $user->assignRole('tenant_admin');

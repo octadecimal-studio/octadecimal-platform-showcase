@@ -37,6 +37,7 @@ final class Tenant extends Model
 {
     /** @use HasFactory<\Database\Factories\TenantFactory> */
     use HasFactory;
+
     use HasUuids;
     use SoftDeletes;
 
@@ -144,7 +145,7 @@ final class Tenant extends Model
     /**
      * Pobiera ustawienie z JSON.
      *
-     * @param mixed $default
+     * @param  mixed  $default
      * @return mixed
      */
     public function getSetting(string $key, $default = null)
@@ -155,7 +156,7 @@ final class Tenant extends Model
     /**
      * Ustawia wartość ustawienia w JSON.
      *
-     * @param mixed $value
+     * @param  mixed  $value
      */
     public function setSetting(string $key, $value): self
     {
