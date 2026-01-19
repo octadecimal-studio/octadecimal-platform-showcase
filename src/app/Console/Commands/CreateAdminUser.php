@@ -84,10 +84,12 @@ class CreateAdminUser extends Command
         // Dla tenant admina - sprawdź czy tenant istnieje
         $tenant = null;
         if ($tenantSlug) {
+            assert(is_string($tenantSlug), 'Tenant slug must be a string');
+            
             $tenant = Tenant::where('slug', $tenantSlug)->where('is_active', true)->first();
 
             if (! $tenant) {
-                $this->error('Tenant \'' . (string) $tenantSlug . '\' nie istnieje lub jest nieaktywny');
+                $this->error("Tenant '{$tenantSlug}' nie istnieje lub jest nieaktywny");
                 $this->info('Dostępne tenanty:');
 
                 foreach (Tenant::where('is_active', true)->get() as $t) {
@@ -120,6 +122,8 @@ class CreateAdminUser extends Command
             $this->line('Rola: super_admin');
             $this->line('Tenant: brak (dostęp do wszystkich)');
         } else {
+            assert($tenant !== null, 'Tenant must be set for tenant admin');
+            
             $user->tenant_id = $tenant->id;
             $user->save();
             $user->assignRole('tenant_admin');

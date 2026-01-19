@@ -43,11 +43,10 @@ use Spatie\Permission\Traits\HasRoles;
  *
  * @method static \Illuminate\Database\Eloquent\Builder<static> where($column, $operator = null, $value = null, $boolean = 'and')
  * @method static \Illuminate\Database\Eloquent\Builder<static> query()
- * @method static static create(array $attributes = [])
+ * @method static static create(array<string, mixed> $attributes = [])
  */
 class User extends Authenticatable implements FilamentUser, HasTenants, MustVerifyEmail
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasApiTokens;
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory;
@@ -228,6 +227,7 @@ class User extends Authenticatable implements FilamentUser, HasTenants, MustVeri
      */
     public function scopeWithTenant(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
     {
+        /** @var \Illuminate\Database\Eloquent\Builder<static> */
         return $query->whereNotNull('tenant_id');
     }
 

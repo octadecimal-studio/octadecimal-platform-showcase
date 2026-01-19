@@ -93,7 +93,7 @@ final class EnsureTenantSession
         }
 
         // 3. Sprawdź czy użytkownik jest zalogowany i ma przypisanego tenanta
-        if ($user !== null && isset($user->tenant_id) && $user->tenant_id !== null) {
+        if ($user !== null && isset($user->tenant_id) && $user->tenant_id !== '') {
             return Tenant::where('id', $user->tenant_id)
                 ->where('is_active', true)
                 ->first();
@@ -162,7 +162,7 @@ final class EnsureTenantSession
         }
 
         // Sprawdź rolę super_admin (Spatie Permission)
-        if (method_exists($user, 'hasRole') && $user->hasRole('super_admin')) {
+        if (is_object($user) && method_exists($user, 'hasRole') && $user->hasRole('super_admin')) {
             return true;
         }
 

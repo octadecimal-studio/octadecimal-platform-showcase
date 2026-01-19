@@ -81,7 +81,7 @@ final class TenantScope implements Scope
         // NIE używamy sesji bezpośrednio - to mogłoby prowadzić do manipulacji
         /** @var \App\Models\User|null $user */
         $user = Auth::user();
-        if ($user !== null && isset($user->tenant_id) && $user->tenant_id !== null) {
+        if ($user !== null && isset($user->tenant_id) && $user->tenant_id !== '') {
             // Waliduj że tenant istnieje i jest aktywny
             $tenant = Tenant::where('id', $user->tenant_id)
                 ->where('is_active', true)

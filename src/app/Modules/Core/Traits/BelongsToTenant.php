@@ -18,10 +18,15 @@ use Illuminate\Support\Facades\Auth;
  * - Ma ustawiany tenant_id przy tworzeniu
  * - Ma zablokowaną zmianę tenant_id przez mass assignment
  *
+ * UWAGA: Trait jest aktualnie unused - przygotowany na przyszłość.
+ * Zostanie użyty w Content/Media modelach (Faza 2).
+ *
  * @property string $tenant_id UUID tenanta
  * @property-read Tenant|null $tenant
  *
  * @mixin Model
+ * 
+ * @phpstan-ignore-next-line trait.unused
  */
 trait BelongsToTenant
 {
