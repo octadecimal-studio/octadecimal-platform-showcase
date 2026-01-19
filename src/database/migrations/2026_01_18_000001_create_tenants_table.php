@@ -30,7 +30,7 @@ return new class extends Migration
             $table->string('database_name')->nullable();
 
             // Ustawienia i status
-            $table->json('settings')->default('{}');
+            $table->json('settings')->nullable();
             $table->boolean('is_active')->default(true);
 
             // Timestampy
