@@ -8,12 +8,14 @@ use App\Models\User;
 use App\Modules\Core\Models\Tenant;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Tests\Traits\CreatesTestUsers;
 
 /**
  * Testy jednostkowe dla modelu Tenant.
  */
 class TenantTest extends TestCase
 {
+    use CreatesTestUsers;
     use RefreshDatabase;
 
     /**
@@ -46,14 +48,9 @@ class TenantTest extends TestCase
             'slug' => 'test-tenant',
         ]);
 
-        $user = User::create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'password' => 'password',
-            'tenant_id' => $tenant->id,
-        ]);
+        $user = $this->createUserForTenant($tenant);
 
-        $this->assertCount(1, $tenant->users);
+        $this->assertCount(1, $tenant->fresh()->users);
         $this->assertEquals($user->id, $tenant->users->first()->id);
     }
 

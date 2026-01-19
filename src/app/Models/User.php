@@ -53,7 +53,13 @@ class User extends Authenticatable implements FilamentUser, HasTenants, MustVeri
     /**
      * Atrybuty, które można masowo przypisywać.
      *
-     * UWAGA: is_super_admin celowo NIE jest tutaj - chronione przed mass assignment.
+     * BEZPIECZEŃSTWO:
+     * - is_super_admin NIE jest tutaj - chronione przed privilege escalation
+     * - tenant_id NIE jest tutaj - zapobiega przypisaniu do obcego tenanta
+     *
+     * Aby przypisać użytkownika do tenanta, użyj:
+     * $user->tenant_id = $tenant->id;
+     * $user->save();
      *
      * @var list<string>
      */
@@ -61,7 +67,6 @@ class User extends Authenticatable implements FilamentUser, HasTenants, MustVeri
         'name',
         'email',
         'password',
-        'tenant_id',
     ];
 
     /**
@@ -138,13 +143,13 @@ class User extends Authenticatable implements FilamentUser, HasTenants, MustVeri
      */
     public function getTenants(Panel $panel): Collection
     {
-        // Super admin widzi wszystkich tenantów
+        // Super admin widzi wszystkich aktywnych tenantów
         if ($this->is_super_admin) {
             return Tenant::where('is_active', true)->get();
         }
 
-        // Zwykły użytkownik widzi tylko swojego tenanta
-        if ($this->tenant !== null) {
+        // Zwykły użytkownik widzi tylko swojego tenanta (jeśli aktywny)
+        if ($this->tenant !== null && $this->tenant->is_active) {
             return collect([$this->tenant]);
         }
 
@@ -153,10 +158,23 @@ class User extends Authenticatable implements FilamentUser, HasTenants, MustVeri
 
     /**
      * Sprawdza czy użytkownik może uzyskać dostęp do danego tenanta.
+     *
+     * BEZPIECZEŃSTWO: Metoda wymaga instancji Tenant i zawsze weryfikuje is_active.
+     * Super admin ma dostęp tylko do AKTYWNYCH tenantów.
      */
     public function canAccessTenant(Model $tenant): bool
     {
-        // Super admin ma dostęp do wszystkich tenantów
+        // Model MUSI być instancją Tenant - fail-closed dla innych typów
+        if (! $tenant instanceof Tenant) {
+            return false;
+        }
+
+        // Tenant MUSI być aktywny - dotyczy WSZYSTKICH użytkowników włącznie z super adminem
+        if (! $tenant->is_active) {
+            return false;
+        }
+
+        // Super admin ma dostęp do wszystkich aktywnych tenantów
         if ($this->is_super_admin) {
             return true;
         }

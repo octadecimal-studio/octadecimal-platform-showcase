@@ -10,10 +10,14 @@ services:
       - XDEBUG_MODE=debug,develop
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    volumes:
+      - ../src:/var/www/html
+      - ./php/php.dev.ini:/usr/local/etc/php/conf.d/custom.ini
 
   nginx:
     ports:
       - "8080:80"
+    # Port 443 celowo pominięty w dev - brak SSL
 
   mysql:
     ports:

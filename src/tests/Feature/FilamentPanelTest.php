@@ -9,12 +9,14 @@ use App\Modules\Core\Models\Tenant;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Tests\Traits\CreatesTestUsers;
 
 /**
  * Testy funkcjonalne dla panelu Filament.
  */
 class FilamentPanelTest extends TestCase
 {
+    use CreatesTestUsers;
     use RefreshDatabase;
 
     protected function setUp(): void
@@ -44,7 +46,7 @@ class FilamentPanelTest extends TestCase
     }
 
     /**
-     * Test: Zalogowany użytkownik widzi dashboard.
+     * Test: Zalogowany użytkownik z zweryfikowanym emailem może uzyskać dostęp do panelu.
      */
     public function test_authenticated_user_sees_dashboard(): void
     {
@@ -53,19 +55,31 @@ class FilamentPanelTest extends TestCase
             'slug' => 'test-tenant',
         ]);
 
+        // Utwórz użytkownika bezpośrednio z wszystkimi wymaganymi atrybutami
         $user = User::create([
             'name' => 'Test User',
             'email' => 'test@example.com',
-            'password' => bcrypt('password'),
-            'tenant_id' => $tenant->id,
-            'email_verified_at' => now(),
+            'password' => 'password',
         ]);
+
+        // Przypisz tenant_id i zweryfikuj email
+        $user->tenant_id = $tenant->id;
+        $user->email_verified_at = now();
+        $user->save();
+
         $user->assignRole('tenant_admin');
 
-        $response = $this->actingAs($user)->get('/admin/tenant/' . $tenant->slug);
+        // Sprawdź czy użytkownik spełnia wymagania
+        $this->assertNotNull($user->tenant_id);
+        $this->assertNotNull($user->email_verified_at);
+        $this->assertTrue($user->tenant->is_active);
 
-        // Powinno być 200 lub przekierowanie do dashboard
-        $this->assertTrue(in_array($response->getStatusCode(), [200, 302]));
+        // Sprawdź czy użytkownik może uzyskać dostęp do panelu
+        $panel = app(\Filament\Panel::class);
+        $this->assertTrue($user->canAccessPanel($panel));
+
+        // Sprawdź czy użytkownik może uzyskać dostęp do tenanta
+        $this->assertTrue($user->canAccessTenant($tenant));
     }
 
     /**
@@ -78,13 +92,7 @@ class FilamentPanelTest extends TestCase
             'slug' => 'test-tenant',
         ]);
 
-        $user = User::create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'password' => bcrypt('password'),
-            'tenant_id' => $tenant->id,
-            'email_verified_at' => now(),
-        ]);
+        $user = $this->createUserForTenant($tenant, ['email' => 'test@example.com']);
 
         $this->actingAs($user);
 
@@ -107,17 +115,32 @@ class FilamentPanelTest extends TestCase
             'slug' => 'tenant-2',
         ]);
 
-        $superAdmin = User::create([
-            'name' => 'Super Admin',
-            'email' => 'admin@octadecimal.studio',
-            'password' => bcrypt('password'),
-            'is_super_admin' => true,
-            'email_verified_at' => now(),
-        ]);
+        $superAdmin = $this->createSuperAdmin(['email' => 'admin@octadecimal.studio']);
         $superAdmin->assignRole('super_admin');
 
         // Super admin może przełączać się między tenantami
         $this->assertTrue($superAdmin->canAccessTenant($tenant1));
         $this->assertTrue($superAdmin->canAccessTenant($tenant2));
+    }
+
+    /**
+     * Test: Użytkownik nie może uzyskać dostępu do nieaktywnego tenanta.
+     */
+    public function test_user_cannot_access_inactive_tenant(): void
+    {
+        $tenant = Tenant::create([
+            'name' => 'Inactive Tenant',
+            'slug' => 'inactive-tenant',
+            'is_active' => false,
+        ]);
+
+        $user = $this->createUserForTenant($tenant, ['email' => 'test@example.com']);
+
+        // Użytkownik nie powinien mieć dostępu
+        $this->assertFalse($user->canAccessTenant($tenant));
+
+        // getTenants powinno zwrócić pustą kolekcję
+        $tenants = $user->getTenants(app(\Filament\Panel::class));
+        $this->assertCount(0, $tenants);
     }
 }

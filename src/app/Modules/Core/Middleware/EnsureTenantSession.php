@@ -13,9 +13,14 @@ use Symfony\Component\HttpFoundation\Response;
  * Middleware ustawiający kontekst tenanta w sesji i kontenerze aplikacji.
  *
  * Sprawdza i waliduje tenanta na podstawie:
- * 1. Zalogowanego użytkownika
+ * 1. Zalogowanego użytkownika (walidacja przynależności)
  * 2. Parametru w URL (dla super_admin)
- * 3. Domeny (dla enterprise z własną domeną)
+ * 3. Domeny (dla enterprise z własną domeną) - działa też dla niezalogowanych
+ *
+ * BEZPIECZEŃSTWO:
+ * - Tenant z sesji jest walidowany względem zalogowanego użytkownika
+ * - Niezalogowani użytkownicy mogą uzyskać kontekst tylko przez domenę
+ * - Super admin może przełączać się między tenantami przez URL
  */
 final class EnsureTenantSession
 {
@@ -26,20 +31,33 @@ final class EnsureTenantSession
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $tenant = $this->resolveTenant($request);
+        $user = $request->user();
+        $tenant = $this->resolveTenant($request, $user);
 
+        // Walidacja dostępu
         if ($tenant === null) {
-            // Jeśli użytkownik jest zalogowany i nie jest super_admin, zwróć 404
-            $user = $request->user();
-            if ($user !== null && ! $this->isSuperAdmin($user)) {
+            // Niezalogowany użytkownik bez kontekstu domeny - OK (np. strona logowania)
+            if ($user === null) {
+                return $next($request);
+            }
+
+            // Zalogowany użytkownik bez tenanta
+            if (! $this->isSuperAdmin($user)) {
+                // Zwykły użytkownik bez tenanta - błąd
                 abort(404);
             }
+            // Super admin bez wybranego tenanta - OK
         }
 
         if ($tenant !== null) {
             // Sprawdź czy tenant jest aktywny
             if (! $tenant->is_active) {
                 abort(404, 'Konto zostało dezaktywowane.');
+            }
+
+            // Waliduj że zalogowany użytkownik ma dostęp do tego tenanta
+            if ($user !== null && ! $this->userCanAccessTenant($user, $tenant)) {
+                abort(404);
             }
 
             // Ustaw tenant w kontenerze i sesji
@@ -51,35 +69,68 @@ final class EnsureTenantSession
 
     /**
      * Próbuje rozpoznać tenanta na podstawie różnych źródeł.
+     *
+     * @param mixed $user
      */
-    private function resolveTenant(Request $request): ?Tenant
+    private function resolveTenant(Request $request, $user): ?Tenant
     {
-        // 1. Sprawdź czy użytkownik jest zalogowany i ma przypisanego tenanta
-        $user = $request->user();
-        if ($user !== null && isset($user->tenant_id)) {
-            return Tenant::find($user->tenant_id);
+        // 1. Sprawdź domenę (dla enterprise) - działa też dla niezalogowanych
+        // To musi być pierwsze, bo pozwala na kontekst przed logowaniem
+        $host = $request->getHost();
+        $domainTenant = Tenant::where('domain', $host)
+            ->where('is_active', true)
+            ->first();
+        if ($domainTenant !== null) {
+            return $domainTenant;
         }
 
         // 2. Sprawdź parametr tenant w URL (dla super_admin)
         $tenantSlug = $request->route('tenant');
         if ($tenantSlug !== null && $this->isSuperAdmin($user)) {
-            return Tenant::where('slug', $tenantSlug)->first();
+            return Tenant::where('slug', $tenantSlug)
+                ->where('is_active', true)
+                ->first();
         }
 
-        // 3. Sprawdź domenę (dla enterprise)
-        $host = $request->getHost();
-        $tenant = Tenant::where('domain', $host)->first();
-        if ($tenant !== null) {
-            return $tenant;
+        // 3. Sprawdź czy użytkownik jest zalogowany i ma przypisanego tenanta
+        if ($user !== null && isset($user->tenant_id) && $user->tenant_id !== null) {
+            return Tenant::where('id', $user->tenant_id)
+                ->where('is_active', true)
+                ->first();
         }
 
-        // 4. Fallback: pobierz z sesji
-        $tenantId = session('tenant_id');
-        if ($tenantId !== null) {
-            return Tenant::find($tenantId);
+        // 4. Fallback: pobierz z sesji (tylko jeśli użytkownik jest zalogowany i walidacja przejdzie)
+        if ($user !== null) {
+            $tenantId = session('tenant_id');
+            if ($tenantId !== null) {
+                $tenant = Tenant::where('id', $tenantId)
+                    ->where('is_active', true)
+                    ->first();
+
+                // Waliduj że użytkownik ma dostęp do tego tenanta
+                if ($tenant !== null && $this->userCanAccessTenant($user, $tenant)) {
+                    return $tenant;
+                }
+            }
         }
 
         return null;
+    }
+
+    /**
+     * Sprawdza czy użytkownik ma dostęp do tenanta.
+     *
+     * @param mixed $user
+     */
+    private function userCanAccessTenant($user, Tenant $tenant): bool
+    {
+        // Super admin ma dostęp do wszystkich tenantów
+        if ($this->isSuperAdmin($user)) {
+            return true;
+        }
+
+        // Zwykły użytkownik - tylko do swojego tenanta
+        return isset($user->tenant_id) && $user->tenant_id === $tenant->id;
     }
 
     /**

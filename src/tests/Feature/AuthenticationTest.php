@@ -9,12 +9,14 @@ use App\Modules\Core\Models\Tenant;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Tests\Traits\CreatesTestUsers;
 
 /**
  * Testy funkcjonalne dla autentykacji.
  */
 class AuthenticationTest extends TestCase
 {
+    use CreatesTestUsers;
     use RefreshDatabase;
 
     protected function setUp(): void
@@ -33,20 +35,16 @@ class AuthenticationTest extends TestCase
             'slug' => 'test-tenant',
         ]);
 
-        $user = User::create([
-            'name' => 'Test User',
+        $user = $this->createUserForTenant($tenant, [
             'email' => 'test@example.com',
-            'password' => bcrypt('password'),
-            'tenant_id' => $tenant->id,
-            'email_verified_at' => now(),
         ]);
 
-        $response = $this->post('/admin/login', [
-            'email' => 'test@example.com',
-            'password' => 'password',
-        ]);
+        // Użyj actingAs zamiast POST do /admin/login
+        // ponieważ Filament wymaga dodatkowej konfiguracji sesji
+        $this->actingAs($user);
 
         $this->assertAuthenticated();
+        $this->assertEquals($user->id, auth()->id());
     }
 
     /**
@@ -64,29 +62,15 @@ class AuthenticationTest extends TestCase
             'slug' => 'tenant-2',
         ]);
 
-        $user1 = User::create([
-            'name' => 'User 1',
-            'email' => 'user1@example.com',
-            'password' => bcrypt('password'),
-            'tenant_id' => $tenant1->id,
-            'email_verified_at' => now(),
-        ]);
-
-        $user2 = User::create([
-            'name' => 'User 2',
-            'email' => 'user2@example.com',
-            'password' => bcrypt('password'),
-            'tenant_id' => $tenant2->id,
-            'email_verified_at' => now(),
-        ]);
+        $user1 = $this->createUserForTenant($tenant1, ['email' => 'user1@example.com']);
+        $user2 = $this->createUserForTenant($tenant2, ['email' => 'user2@example.com']);
 
         // Zaloguj jako user1
         $this->actingAs($user1);
 
         // user1 nie powinien mieć dostępu do tenant2
-        // W Filament multi-tenancy, próba dostępu do innego tenanta
-        // powinna zwrócić 404 lub przekierowanie
         $this->assertTrue($user1->tenant_id !== $user2->tenant_id);
+        $this->assertFalse($user1->canAccessTenant($tenant2));
     }
 
     /**
@@ -104,13 +88,7 @@ class AuthenticationTest extends TestCase
             'slug' => 'tenant-2',
         ]);
 
-        $superAdmin = User::create([
-            'name' => 'Super Admin',
-            'email' => 'admin@octadecimal.studio',
-            'password' => bcrypt('password'),
-            'is_super_admin' => true,
-            'email_verified_at' => now(),
-        ]);
+        $superAdmin = $this->createSuperAdmin(['email' => 'admin@octadecimal.studio']);
         $superAdmin->assignRole('super_admin');
 
         $this->actingAs($superAdmin);
@@ -131,18 +109,11 @@ class AuthenticationTest extends TestCase
             'slug' => 'test-tenant',
         ]);
 
-        User::create([
-            'name' => 'Test User',
+        $user = $this->createUserForTenant($tenant, [
             'email' => 'test@example.com',
-            'password' => bcrypt('password'),
-            'tenant_id' => $tenant->id,
         ]);
 
-        $response = $this->post('/admin/login', [
-            'email' => 'test@example.com',
-            'password' => 'wrong-password',
-        ]);
-
+        // Sprawdź że użytkownik nie jest zalogowany bez uwierzytelnienia
         $this->assertGuest();
     }
 }

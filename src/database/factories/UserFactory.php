@@ -13,6 +13,9 @@ use Illuminate\Support\Str;
 /**
  * Factory dla modelu User.
  *
+ * UWAGA: tenant_id i is_super_admin są chronione przed mass assignment.
+ * Używaj metod forTenant() i superAdmin() które ustawiają te wartości bezpiecznie.
+ *
  * @extends Factory<User>
  */
 class UserFactory extends Factory
@@ -35,7 +38,6 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
-            'tenant_id' => null,
         ];
     }
 
@@ -55,21 +57,22 @@ class UserFactory extends Factory
      */
     public function superAdmin(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'tenant_id' => null,
-        ])->afterCreating(function (User $user): void {
+        return $this->afterCreating(function (User $user): void {
             $user->is_super_admin = true;
+            $user->tenant_id = null;
             $user->save();
         });
     }
 
     /**
      * Przypisuje użytkownika do tenanta.
+     * tenant_id jest ustawiany po utworzeniu (chroniony przed mass assignment).
      */
     public function forTenant(Tenant $tenant): static
     {
-        return $this->state(fn (array $attributes) => [
-            'tenant_id' => $tenant->id,
-        ]);
+        return $this->afterCreating(function (User $user) use ($tenant): void {
+            $user->tenant_id = $tenant->id;
+            $user->save();
+        });
     }
 }

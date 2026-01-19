@@ -28,7 +28,7 @@ class TenantSeeder extends Seeder
                 'email_verified_at' => now(),
             ]
         );
-        // is_super_admin ustawiamy bezpośrednio (chronione przed mass assignment)
+        // Pola chronione ustawiamy bezpośrednio (nie przez mass assignment)
         $superAdmin->is_super_admin = true;
         $superAdmin->save();
         $superAdmin->assignRole('super_admin');
@@ -59,10 +59,12 @@ class TenantSeeder extends Seeder
             [
                 'name' => 'Demo Admin',
                 'password' => Hash::make('password'),
-                'tenant_id' => $demoTenant->id,
                 'email_verified_at' => now(),
             ]
         );
+        // tenant_id ustawiamy bezpośrednio (chronione przed mass assignment)
+        $tenantAdmin->tenant_id = $demoTenant->id;
+        $tenantAdmin->save();
         $tenantAdmin->assignRole('tenant_admin');
 
         // Editor dla demo tenanta
@@ -71,10 +73,11 @@ class TenantSeeder extends Seeder
             [
                 'name' => 'Demo Editor',
                 'password' => Hash::make('password'),
-                'tenant_id' => $demoTenant->id,
                 'email_verified_at' => now(),
             ]
         );
+        $editor->tenant_id = $demoTenant->id;
+        $editor->save();
         $editor->assignRole('editor');
 
         // Viewer dla demo tenanta
@@ -83,10 +86,11 @@ class TenantSeeder extends Seeder
             [
                 'name' => 'Demo Viewer',
                 'password' => Hash::make('password'),
-                'tenant_id' => $demoTenant->id,
                 'email_verified_at' => now(),
             ]
         );
+        $viewer->tenant_id = $demoTenant->id;
+        $viewer->save();
         $viewer->assignRole('viewer');
 
         // === DRUGI TENANT (dla testów izolacji) ===
@@ -110,10 +114,11 @@ class TenantSeeder extends Seeder
             [
                 'name' => 'Test Agency Admin',
                 'password' => Hash::make('password'),
-                'tenant_id' => $secondTenant->id,
                 'email_verified_at' => now(),
             ]
         );
+        $secondAdmin->tenant_id = $secondTenant->id;
+        $secondAdmin->save();
         $secondAdmin->assignRole('tenant_admin');
     }
 }

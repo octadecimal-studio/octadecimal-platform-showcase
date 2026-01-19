@@ -16,11 +16,24 @@ use Illuminate\Support\Facades\Auth;
  * Ten scope jest automatycznie stosowany do wszystkich modeli
  * używających traitu BelongsToTenant. Zapewnia izolację danych
  * między tenantami.
+ *
+ * BEZPIECZEŃSTWO:
+ * - Scope waliduje, że sesyjny tenant_id należy do zalogowanego użytkownika
+ * - Gdy brak kontekstu tenanta, stosuje FAIL-CLOSED - zwraca puste wyniki
+ * - Aby pominąć filtrowanie, użyj: ->withoutGlobalScope(TenantScope::class)
  */
 final class TenantScope implements Scope
 {
     /**
      * Stosuje scope do zapytania Eloquent.
+     *
+     * BEZPIECZEŃSTWO: Gdy brak kontekstu tenanta, scope stosuje warunek
+     * który NIE zwróci żadnych rekordów (fail-closed). Zapobiega to
+     * wyciekowi danych między tenantami w kontekstach bez tenant binding
+     * (np. komendy artisan, queue jobs).
+     *
+     * Aby wykonać zapytanie bez filtrowania po tenancie (np. dla super admina),
+     * użyj: Model::withoutGlobalScope(TenantScope::class)->get()
      *
      * @param Builder<Model> $builder
      */
@@ -29,31 +42,52 @@ final class TenantScope implements Scope
         $tenant = $this->getCurrentTenant();
 
         if ($tenant !== null) {
+            // Filtruj po aktywnym tenancie
             $builder->where($model->getTable() . '.tenant_id', $tenant->id);
+        } else {
+            // FAIL-CLOSED: Brak kontekstu tenanta = brak wyników
+            // Zapobiega przypadkowemu zwróceniu wszystkich rekordów
+            // Używamy WHERE 1=0 jako niemożliwy warunek
+            $builder->whereRaw('1 = 0');
         }
     }
 
     /**
      * Pobiera aktualnego tenanta z kontekstu.
+     *
+     * Priorytet:
+     * 1. Kontener aplikacji (ustawiony przez middleware)
+     * 2. Zalogowany użytkownik (z walidacją)
+     *
+     * UWAGA: Sesja NIE jest używana bezpośrednio - tylko przez middleware,
+     * który waliduje przynależność użytkownika do tenanta.
      */
     private function getCurrentTenant(): ?Tenant
     {
         // Sprawdzamy czy jest ustawiony tenant w kontekście aplikacji
+        // (ustawiony przez EnsureTenantSession middleware po walidacji)
         if (app()->bound('current_tenant')) {
-            return app('current_tenant');
+            $tenant = app('current_tenant');
+
+            // Dodatkowa walidacja: sprawdź czy tenant jest aktywny
+            if ($tenant instanceof Tenant && $tenant->is_active) {
+                return $tenant;
+            }
+
+            return null;
         }
 
-        // Fallback: próbujemy pobrać z sesji
-        $tenantId = session('tenant_id');
-        if ($tenantId !== null) {
-            return Tenant::find($tenantId);
-        }
-
-        // Fallback: próbujemy pobrać od zalogowanego użytkownika
+        // Fallback: pobierz od zalogowanego użytkownika
+        // NIE używamy sesji bezpośrednio - to mogłoby prowadzić do manipulacji
         /** @var \App\Models\User|null $user */
         $user = Auth::user();
-        if ($user !== null && isset($user->tenant_id)) {
-            return $user->tenant;
+        if ($user !== null && isset($user->tenant_id) && $user->tenant_id !== null) {
+            // Waliduj że tenant istnieje i jest aktywny
+            $tenant = Tenant::where('id', $user->tenant_id)
+                ->where('is_active', true)
+                ->first();
+
+            return $tenant;
         }
 
         return null;
