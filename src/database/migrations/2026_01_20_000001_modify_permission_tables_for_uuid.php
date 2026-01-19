@@ -20,10 +20,10 @@ return new class extends Migration
         Schema::table('model_has_permissions', function (Blueprint $table) {
             // Drop foreign key constraints if they exist
             $table->dropPrimary(['permission_id', 'model_id', 'model_type']);
-            
+
             // Change column type
             $table->uuid('model_id')->change();
-            
+
             // Recreate primary key
             $table->primary(['permission_id', 'model_id', 'model_type']);
         });
@@ -32,10 +32,10 @@ return new class extends Migration
         Schema::table('model_has_roles', function (Blueprint $table) {
             // Drop foreign key constraints if they exist
             $table->dropPrimary(['role_id', 'model_id', 'model_type']);
-            
+
             // Change column type
             $table->uuid('model_id')->change();
-            
+
             // Recreate primary key
             $table->primary(['role_id', 'model_id', 'model_type']);
         });
