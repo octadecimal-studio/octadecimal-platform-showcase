@@ -1,66 +1,281 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Octadecimal Studio - Backend
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+> Laravel 11 + Filament 3 + Multi-tenancy + RBAC
 
-## About Laravel
+Panel administracyjny dla systemu CMS Octadecimal Studio.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🚀 Stack technologiczny
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- **Backend:** Laravel 11, Filament 3, Breeze + Sanctum
+- **Database:** MySQL 8.0, Redis
+- **Media:** Intervention Image 3, Glide
+- **API:** GraphQL (Lighthouse) + REST
+- **RBAC:** Spatie Permission + Filament Shield
+- **Queue:** Laravel Horizon
+- **Testing:** PHPUnit/Pest, Playwright
+- **Code Quality:** PHPStan level 8, PHP CS Fixer (PSR-12)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 📦 Instalacja
 
-## Learning Laravel
+### Wymagania
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- PHP 8.3+
+- Composer
+- Docker + Docker Compose
+- Node.js 20+ (dla frontend)
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### Kroki instalacji
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+1. **Klonowanie repozytorium**
+```bash
+git clone https://github.com/octadecimal/octadecimal-studio.git
+cd octadecimal-studio
+```
 
-## Laravel Sponsors
+2. **Konfiguracja środowiska**
+```bash
+# Skopiuj przykładowy plik .env
+cp src/.env.example src/.env
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+# Wygeneruj klucz aplikacji
+cd src
+php artisan key:generate
+```
 
-### Premium Partners
+3. **Uruchomienie Dockera (development)**
+```bash
+# Z katalogu głównego projektu
+cd ..
+docker compose -f docker/docker-compose.yml -f docker/docker-compose.dev.yml up -d
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+# Alternatywnie użyj wrapper script
+./sail up -d
+```
 
-## Contributing
+4. **Instalacja zależności**
+```bash
+# PHP
+cd src
+composer install
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+# Frontend
+npm install
+npm run dev
+```
 
-## Code of Conduct
+5. **Migracje i seedery**
+```bash
+php artisan migrate
+php artisan db:seed
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+6. **Utworzenie pierwszego użytkownika admin**
+```bash
+# Super admin (dostęp do wszystkich tenantów)
+php artisan admin:create --super --email=admin@example.com --name="Super Admin"
 
-## Security Vulnerabilities
+# Tenant admin (dla konkretnego tenanta)
+php artisan admin:create --tenant=demo-studio --email=admin@demo.com --name="Demo Admin"
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## 🔐 Dostęp do panelu
 
-## License
+- **URL:** http://localhost:8080/admin
+- **Domyślne konta (po seedzie):**
+  - Super Admin: `admin@octadecimal.studio` / `password`
+  - Demo Tenant Admin: `admin@demo-studio.local` / `password`
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## 🧪 Testy
+
+```bash
+# Wszystkie testy
+php artisan test
+
+# Tylko testy jednostkowe
+php artisan test --testsuite=Unit
+
+# Tylko testy funkcjonalne
+php artisan test --testsuite=Feature
+
+# Pokrycie kodu
+php artisan test --coverage
+```
+
+## 🛠️ Przydatne komendy
+
+### Docker
+
+```bash
+# Uruchomienie
+./sail up -d
+
+# Zatrzymanie
+./sail down
+
+# Logi
+./sail logs -f
+
+# Shell w kontenerze
+./sail shell
+```
+
+### Laravel
+
+```bash
+# Cache
+php artisan optimize
+php artisan cache:clear
+php artisan config:clear
+php artisan view:clear
+
+# Queue
+php artisan queue:work
+php artisan horizon
+
+# Linting
+./vendor/bin/phpstan analyse
+./vendor/bin/pint
+```
+
+### Użytkownicy
+
+```bash
+# Utworzenie super admina
+php artisan admin:create --super
+
+# Utworzenie tenant admina
+php artisan admin:create --tenant=slug-tenanta
+
+# Lista tenantów
+php artisan tinker
+>>> App\Modules\Core\Models\Tenant::all(['slug', 'name']);
+```
+
+## 📖 Architektura
+
+### Multi-tenancy
+
+Projekt używa architecture multi-tenancy opartej na kolumnie `tenant_id`:
+
+- **Tenant:** Klient korzystający z systemu (np. agencja, freelancer)
+- **Izolacja danych:** Global Scope automatycznie filtruje dane po `tenant_id`
+- **Bezpieczeństwo:** Fail-closed - brak kontekstu tenanta = brak danych
+
+```php
+// Modele używające multi-tenancy
+use App\Modules\Core\Traits\BelongsToTenant;
+
+class Project extends Model {
+    use BelongsToTenant;
+}
+```
+
+### RBAC (Role-Based Access Control)
+
+4 podstawowe role:
+
+1. **super_admin** - pełny dostęp do systemu, zarządzanie wszystkimi tenantami
+2. **tenant_admin** - zarządzanie danym tenantem (użytkownicy, projekty, treści)
+3. **editor** - edycja treści i mediów
+4. **viewer** - tylko odczyt
+
+Uprawnienia grupowane po modułach:
+- `projects.*` - zarządzanie projektami
+- `content.*` - zarządzanie treściami
+- `media.*` - zarządzanie mediami
+- `users.*` - zarządzanie użytkownikami
+
+## 📂 Struktura modułów
+
+```
+src/app/Modules/
+├── Content/       # CMS - treści, media, szablony
+├── Generator/     # AI Template Generator
+├── Deploy/        # VPS/OVH deployment
+├── Marketplace/   # Allegro integration
+├── Studio/        # Portfolio, projekty
+└── Core/          # Shared - tenants, users, audit
+```
+
+## 🔒 Bezpieczeństwo
+
+### Najlepsze praktyki
+
+- ✅ Mass assignment protection (`$guarded`, `$fillable`)
+- ✅ Fail-closed design (brak kontekstu = brak dostępu)
+- ✅ CSRF protection
+- ✅ Secure session cookies (HTTPS w produkcji)
+- ✅ Password hashing (bcrypt)
+- ✅ SQL injection protection (Eloquent ORM)
+- ✅ XSS protection (Blade templating)
+
+### Headers bezpieczeństwa (produkcja)
+
+```
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Content-Security-Policy: default-src 'self'
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+```
+
+## 📝 Konwencje
+
+### Commity
+
+Używamy [Conventional Commits](https://www.conventionalcommits.org/):
+
+```
+feat(module): dodaj nową funkcję
+fix(security): naprawa luki bezpieczeństwa
+docs: aktualizacja dokumentacji
+refactor: refaktoryzacja kodu
+test: dodanie/poprawka testów
+chore: zmiany w konfiguracji
+```
+
+### Kod
+
+- **Język komentarzy:** Polski
+- **Nazwy zmiennych/funkcji:** Angielski (PSR-12)
+- **PHPStan:** Level 8 (wymagane)
+- **PHP CS Fixer:** PSR-12 (wymagane)
+
+## 🐛 Debugging
+
+### Xdebug (development)
+
+Xdebug jest dostępny w środowisku development:
+
+```bash
+# W docker-compose.dev.yml
+XDEBUG_MODE=debug,develop
+```
+
+Konfiguracja IDE:
+- Host: `host.docker.internal`
+- Port: `9003`
+- IDE key: `PHPSTORM`
+
+### Logi
+
+```bash
+# Laravel logs
+tail -f storage/logs/laravel.log
+
+# Nginx logs
+docker compose -f docker/docker-compose.dev.yml logs -f nginx
+
+# MySQL logs
+docker compose -f docker/docker-compose.dev.yml logs -f mysql
+```
+
+## 📞 Support
+
+- **Dokumentacja:** `docs/`
+- **Issues:** https://github.com/octadecimal/octadecimal-studio/issues
+- **Email:** support@octadecimal.studio
+
+## 📄 Licencja
+
+Proprietary - © 2026 Octadecimal Studio
