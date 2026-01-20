@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace App\GraphQL\Types;
 
 use App\Modules\Content\Models\Media;
-use GraphQL\Type\Definition\Type;
-use Nuwave\Lighthouse\Schema\TypeRegistry;
 
 /**
  * GraphQL Type resolver dla Media.
@@ -15,10 +13,6 @@ use Nuwave\Lighthouse\Schema\TypeRegistry;
  */
 class MediaType
 {
-    public function __construct(
-        private TypeRegistry $typeRegistry
-    ) {}
-
     /**
      * Resolver dla pola `url` w Media.
      */
