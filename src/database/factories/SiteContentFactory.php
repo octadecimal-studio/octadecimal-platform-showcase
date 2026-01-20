@@ -108,9 +108,8 @@ final class SiteContentFactory extends Factory
      */
     public function forTenant(Tenant $tenant): static
     {
-        return $this->afterCreating(function (SiteContent $content) use ($tenant) {
-            $content->tenant_id = $tenant->id;
-            $content->save();
-        });
+        return $this->state(fn (array $attributes) => [
+            'tenant_id' => $tenant->id,
+        ]);
     }
 }

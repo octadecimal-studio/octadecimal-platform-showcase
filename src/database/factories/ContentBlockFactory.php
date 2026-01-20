@@ -92,9 +92,8 @@ final class ContentBlockFactory extends Factory
      */
     public function forTenant(Tenant $tenant): static
     {
-        return $this->afterCreating(function (ContentBlock $block) use ($tenant) {
-            $block->tenant_id = $tenant->id;
-            $block->save();
-        });
+        return $this->state(fn (array $attributes) => [
+            'tenant_id' => $tenant->id,
+        ]);
     }
 }
