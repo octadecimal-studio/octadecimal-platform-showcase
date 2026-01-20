@@ -114,6 +114,8 @@ final class SiteContent extends Model
      */
     public function parent(): BelongsTo
     {
+        // PHPStan: withoutGlobalScope returns Builder, not BelongsTo
+        /** @phpstan-ignore-next-line return.type */
         return $this->belongsTo(SiteContent::class, 'parent_id')
             ->withoutGlobalScope(\App\Modules\Core\Scopes\TenantScope::class);
     }
@@ -127,6 +129,8 @@ final class SiteContent extends Model
      */
     public function children(): HasMany
     {
+        // PHPStan: withoutGlobalScope returns Builder, not HasMany
+        /** @phpstan-ignore-next-line return.type */
         return $this->hasMany(SiteContent::class, 'parent_id')
             ->withoutGlobalScope(\App\Modules\Core\Scopes\TenantScope::class);
     }
