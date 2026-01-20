@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Modules\Content\Models\MediaResource\Pages;
 
 use App\Filament\Resources\Modules\Content\Models\MediaResource;
+use App\Models\User;
 use App\Modules\Content\Services\MediaService;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Http\UploadedFile;
@@ -30,7 +31,12 @@ class CreateMedia extends CreateRecord
 
         // Pobierz tenant_id z aktualnego użytkownika
         $user = Auth::user();
-        $tenantId = $user?->tenant_id;
+
+        if (! $user instanceof User) {
+            throw new \InvalidArgumentException('User must be authenticated');
+        }
+
+        $tenantId = $user->tenant_id;
 
         if (! $tenantId) {
             throw new \InvalidArgumentException('User must belong to a tenant');
