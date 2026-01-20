@@ -1,0 +1,332 @@
+"A datetime string with format `Y-m-d H:i:s`, e.g. `2018-05-23 13:43:32`."
+scalar DateTime @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\DateTime")
+
+"A JSON scalar type."
+scalar JSON @scalar(class: "App\\GraphQL\\Scalars\\JSON")
+
+"Indicates what fields are available at the top level of a query operation."
+type Query {
+    "Find a single user by an identifying attribute."
+    user(
+      "Search by primary key."
+      id: ID @eq @rules(apply: ["prohibits:email", "required_without:email"])
+
+      "Search by email address."
+      email: String @eq @rules(apply: ["prohibits:id", "required_without:id", "email"])
+    ): User @find
+
+    "List multiple users."
+    users(
+      "Filters by name. Accepts SQL LIKE wildcards `%` and `_`."
+      name: String @where(operator: "like")
+    ): [User!]! @paginate(defaultCount: 10)
+
+    "Find a single site content by ID."
+    siteContent(
+      "Search by primary key."
+      id: ID! @eq
+    ): SiteContent @find
+
+    "List multiple site contents."
+    siteContents(
+      "Filter by type."
+      type: String @where(operator: "=")
+      "Filter by status."
+      status: String @where(operator: "=")
+      "Filter by parent ID."
+      parent_id: ID @where(operator: "=")
+    ): [SiteContent!]! @paginate(defaultCount: 10)
+
+    "Find a single media by ID."
+    media(
+      "Search by primary key."
+      id: ID! @eq
+    ): Media @find
+
+    "List multiple media files."
+    mediaFiles(
+      "Filter by collection."
+      collection: String @where(operator: "=")
+      "Filter by MIME type."
+      mime_type: String @where(operator: "like")
+    ): [Media!]! @paginate(defaultCount: 20)
+
+    "List media files for a specific project."
+    projectMedia(
+      "Project ID."
+      project_id: ID! @eq
+      "Filter by collection."
+      collection: String @where(operator: "=")
+    ): [Media!]! @paginate(defaultCount: 20)
+
+    "Find a single content block by ID."
+    contentBlock(
+      "Search by primary key."
+      id: ID! @eq
+    ): ContentBlock @find
+
+    "List multiple content blocks."
+    contentBlocks(
+      "Filter by category."
+      category: String @where(operator: "=")
+      "Filter by active status."
+      is_active: Boolean @where(operator: "=")
+    ): [ContentBlock!]! @paginate(defaultCount: 20)
+}
+
+"Account of a person who uses this application."
+type User {
+    "Unique primary key."
+    id: ID!
+
+    "Non-unique name."
+    name: String!
+
+    "Unique email address."
+    email: String!
+
+    "When the email was verified."
+    email_verified_at: DateTime
+
+    "When the account was created."
+    created_at: DateTime!
+
+    "When the account was last updated."
+    updated_at: DateTime!
+}
+
+"Site content model (pages, sections, components, blocks)."
+type SiteContent {
+    "Unique primary key (UUID)."
+    id: ID!
+
+    "Tenant ID."
+    tenant_id: ID!
+
+    "Project ID (optional)."
+    project_id: ID
+
+    "Content type: page, section, component, block."
+    type: String!
+
+    "Title."
+    title: String!
+
+    "Slug (for pages)."
+    slug: String
+
+    "Description."
+    description: String
+
+    "Flexible content data (JSON)."
+    data: JSON
+
+    "Meta data (SEO, OG tags)."
+    meta: JSON
+
+    "Status: draft, published, archived."
+    status: String!
+
+    "Publication date."
+    published_at: DateTime
+
+    "Sort order."
+    order: Int!
+
+    "Parent content ID (for hierarchy)."
+    parent_id: ID
+
+    "Whether this is the current version."
+    is_current_version: Boolean!
+
+    "Version number."
+    version: Int!
+
+    "When the content was created."
+    created_at: DateTime!
+
+    "When the content was last updated."
+    updated_at: DateTime!
+
+    "Parent content (if exists)."
+    parent: SiteContent @belongsTo
+
+    "Child contents."
+    children: [SiteContent!]! @hasMany
+}
+
+"Media file model."
+type Media {
+    "Unique primary key (UUID)."
+    id: ID!
+
+    "Tenant ID."
+    tenant_id: ID!
+
+    "Project ID (optional)."
+    project_id: ID
+
+    "Original file name."
+    file_name: String!
+
+    "File path in storage (relative)."
+    file_path: String!
+
+    "MIME type."
+    mime_type: String!
+
+    "File size in bytes."
+    size: Int!
+
+    "Storage disk."
+    disk: String!
+
+    "Image width (for images)."
+    width: Int
+
+    "Image height (for images)."
+    height: Int
+
+    "Alt text for images."
+    alt_text: String
+
+    "Caption/description."
+    caption: String
+
+    "Metadata (EXIF, IPTC, etc.)."
+    metadata: JSON
+
+    "Image variants (thumbnail, small, medium, large)."
+    variants: JSON
+
+    "Dominant colors (RGB)."
+    dominant_colors: [String!]
+
+    "Collection/category."
+    collection: String
+
+    "Tags."
+    tags: [String!]
+
+    "Whether the file is public."
+    is_public: Boolean!
+
+    "Whether the file is active."
+    is_active: Boolean!
+
+    "Public URL to the file."
+    url: String! @field(resolver: "App\\GraphQL\\Types\\MediaType@url")
+
+    "URL to a specific variant."
+    variantUrl(variant: String!): String @field(resolver: "App\\GraphQL\\Types\\MediaType@variantUrl")
+
+    "When the media was created."
+    created_at: DateTime!
+
+    "When the media was last updated."
+    updated_at: DateTime!
+}
+
+"Content block model (reusable blocks)."
+type ContentBlock {
+    "Unique primary key (UUID)."
+    id: ID!
+
+    "Tenant ID."
+    tenant_id: ID!
+
+    "Block name."
+    name: String!
+
+    "Block slug."
+    slug: String!
+
+    "Block category."
+    category: String
+
+    "Description."
+    description: String
+
+    "Block schema (JSON Schema)."
+    schema: JSON
+
+    "Default data (JSON)."
+    default_data: JSON
+
+    "Configuration (JSON)."
+    config: JSON
+
+    "Icon name."
+    icon: String
+
+    "Usage count."
+    usage_count: Int!
+
+    "Whether the block is active."
+    is_active: Boolean!
+
+    "When the block was created."
+    created_at: DateTime!
+
+    "When the block was last updated."
+    updated_at: DateTime!
+}
+
+"Indicates what fields are available at the top level of a mutation operation."
+type Mutation {
+    "Create a new site content."
+    createContent(
+        "Content type: page, section, component, block."
+        type: String! @rules(apply: ["required", "in:page,section,component,block"])
+        "Title."
+        title: String! @rules(apply: ["required", "max:255"])
+        "Slug (for pages)."
+        slug: String @rules(apply: ["max:255"])
+        "Description."
+        description: String
+        "Flexible content data (JSON)."
+        data: JSON
+        "Meta data (SEO, OG tags)."
+        meta: JSON
+        "Status: draft, published, archived."
+        status: String! @rules(apply: ["required", "in:draft,published,archived"])
+        "Publication date."
+        published_at: DateTime
+        "Sort order."
+        order: Int
+        "Parent content ID (for hierarchy)."
+        parent_id: ID
+    ): SiteContent! @create @guard(with: ["sanctum"])
+
+    "Update an existing site content."
+    updateContent(
+        "Content ID."
+        id: ID! @rules(apply: ["required"])
+        "Content type: page, section, component, block."
+        type: String @rules(apply: ["in:page,section,component,block"])
+        "Title."
+        title: String @rules(apply: ["max:255"])
+        "Slug (for pages)."
+        slug: String @rules(apply: ["max:255"])
+        "Description."
+        description: String
+        "Flexible content data (JSON)."
+        data: JSON
+        "Meta data (SEO, OG tags)."
+        meta: JSON
+        "Status: draft, published, archived."
+        status: String @rules(apply: ["in:draft,published,archived"])
+        "Publication date."
+        published_at: DateTime
+        "Sort order."
+        order: Int
+        "Parent content ID (for hierarchy)."
+        parent_id: ID
+    ): SiteContent! @update @guard(with: ["sanctum"])
+
+    "Delete a site content."
+    deleteContent(
+        "Content ID."
+        id: ID! @rules(apply: ["required"])
+    ): SiteContent! @delete @guard(with: ["sanctum"])
+}
