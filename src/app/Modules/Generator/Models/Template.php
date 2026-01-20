@@ -109,7 +109,6 @@ final class Template extends Model
      * Scope: Filtruj po kategorii.
      *
      * @param  \Illuminate\Database\Eloquent\Builder<static>  $query
-     * @param  string  $category
      * @return \Illuminate\Database\Eloquent\Builder<static>
      */
     public function scopeOfCategory(\Illuminate\Database\Eloquent\Builder $query, string $category): \Illuminate\Database\Eloquent\Builder
