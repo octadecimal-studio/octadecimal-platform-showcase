@@ -108,21 +108,27 @@ final class SiteContent extends Model
     /**
      * Relacja: Rodzic w hierarchii.
      *
+     * Wyłączamy TenantScope bo parent i child mają tego samego tenanta.
+     *
      * @return BelongsTo<SiteContent, $this>
      */
     public function parent(): BelongsTo
     {
-        return $this->belongsTo(SiteContent::class, 'parent_id');
+        return $this->belongsTo(SiteContent::class, 'parent_id')
+            ->withoutGlobalScope(\App\Modules\Core\Scopes\TenantScope::class);
     }
 
     /**
      * Relacja: Dzieci w hierarchii.
      *
+     * Wyłączamy TenantScope bo parent i child mają tego samego tenanta.
+     *
      * @return HasMany<SiteContent, $this>
      */
     public function children(): HasMany
     {
-        return $this->hasMany(SiteContent::class, 'parent_id');
+        return $this->hasMany(SiteContent::class, 'parent_id')
+            ->withoutGlobalScope(\App\Modules\Core\Scopes\TenantScope::class);
     }
 
     /**

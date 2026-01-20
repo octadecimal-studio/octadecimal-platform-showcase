@@ -79,10 +79,6 @@ final class SiteContentTest extends TestCase
             ->section()
             ->create(['parent_id' => $parent->id]);
 
-        // Reload relations without TenantScope
-        $parent = $parent->fresh();
-        $child = $child->fresh();
-
         $this->assertEquals($parent->id, $child->parent->id);
         $this->assertTrue($parent->children->contains($child));
     }
