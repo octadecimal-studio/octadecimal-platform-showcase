@@ -16,7 +16,7 @@ services:
 
   nginx:
     ports:
-      - "8080:80"
+      - "8082:80"
     # Port 443 celowo pominięty w dev - brak SSL
 
   mysql:
