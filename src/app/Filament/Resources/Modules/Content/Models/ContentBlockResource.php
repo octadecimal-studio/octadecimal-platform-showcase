@@ -177,6 +177,11 @@ final class ContentBlockResource extends Resource
         ];
     }
 
+    /**
+     * Query builder z domyślnymi filtrami.
+     *
+     * @return Builder<ContentBlock>
+     */
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()

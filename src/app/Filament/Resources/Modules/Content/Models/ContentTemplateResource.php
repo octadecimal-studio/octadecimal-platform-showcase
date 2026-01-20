@@ -225,6 +225,11 @@ final class ContentTemplateResource extends Resource
         ];
     }
 
+    /**
+     * Query builder z domyślnymi filtrami.
+     *
+     * @return Builder<ContentTemplate>
+     */
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()

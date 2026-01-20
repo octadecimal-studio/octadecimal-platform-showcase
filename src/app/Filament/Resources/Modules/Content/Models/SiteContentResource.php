@@ -330,6 +330,8 @@ final class SiteContentResource extends Resource
 
     /**
      * Query builder z domyślnymi filtrami.
+     *
+     * @return Builder<SiteContent>
      */
     public static function getEloquentQuery(): Builder
     {
