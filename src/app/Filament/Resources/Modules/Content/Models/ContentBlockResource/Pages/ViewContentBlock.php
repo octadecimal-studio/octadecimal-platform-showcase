@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Filament\Resources\Modules\Content\Models\ContentBlockResource\Pages;
