@@ -33,7 +33,7 @@
     "cheerio": "^1.1.2",
     "commander": "^12.1.0",
     "fs-extra": "^11.2.0",
-    "inquirer": "^12.3.0",
+    "inquirer": "^13.2.0",
     "node-fetch": "^3.3.2",
     "ora": "^8.1.1",
     "ovh": "latest",
