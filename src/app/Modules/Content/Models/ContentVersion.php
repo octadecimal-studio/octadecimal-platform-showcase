@@ -150,6 +150,8 @@ final class ContentVersion extends Model
     public function markAsCurrent(): void
     {
         // Odznacz wszystkie inne wersje tego modelu
+        // PHPStan: scopeForModel() is a query scope, not static method
+        /** @phpstan-ignore-next-line staticMethod.notFound */
         self::forModel($this->versionable)
             ->where('id', '!=', $this->id)
             ->update(['is_current' => false]);
