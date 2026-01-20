@@ -42,8 +42,17 @@ final class ContentBlock extends Model
 
     /** @use HasFactory<\Database\Factories\ContentBlockFactory> */
     use HasFactory;
+
     use HasUuids;
     use SoftDeletes;
+
+    /**
+     * Nazwa factory dla modelu.
+     */
+    protected static function newFactory(): \Database\Factories\ContentBlockFactory
+    {
+        return \Database\Factories\ContentBlockFactory::new();
+    }
 
     /**
      * Nazwa tabeli.
@@ -88,24 +97,22 @@ final class ContentBlock extends Model
     /**
      * Scope: Tylko aktywne bloki.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder<static>  $query
-     * @return \Illuminate\Database\Eloquent\Builder<static>
+     * @param  \Illuminate\Database\Eloquent\Builder<ContentBlock>  $query
+     * @return \Illuminate\Database\Eloquent\Builder<ContentBlock>
      */
     public function scopeActive(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
     {
-        /** @var \Illuminate\Database\Eloquent\Builder<static> */
         return $query->where('is_active', true);
     }
 
     /**
      * Scope: Filtruj po kategorii.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder<static>  $query
-     * @return \Illuminate\Database\Eloquent\Builder<static>
+     * @param  \Illuminate\Database\Eloquent\Builder<ContentBlock>  $query
+     * @return \Illuminate\Database\Eloquent\Builder<ContentBlock>
      */
     public function scopeOfCategory(\Illuminate\Database\Eloquent\Builder $query, string $category): \Illuminate\Database\Eloquent\Builder
     {
-        /** @var \Illuminate\Database\Eloquent\Builder<static> */
         return $query->where('category', $category);
     }
 

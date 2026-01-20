@@ -55,12 +55,14 @@ trait BelongsToTenant
     }
 
     /**
-     * Inicjalizacja traitu - dodaje tenant_id do fillable.
+     * Inicjalizacja traitu - dodaje tenant_id do guarded.
      */
     public function initializeBelongsToTenant(): void
     {
         // Dodaj tenant_id do guarded, żeby zapobiec mass assignment
-        if (! in_array('tenant_id', $this->guarded, true)) {
+        // PHPStan: $this->guarded może być bool lub array, sprawdzamy typ
+        $guarded = $this->guarded;
+        if (is_array($guarded) && ! in_array('tenant_id', $guarded, true)) {
             $this->guarded[] = 'tenant_id';
         }
     }

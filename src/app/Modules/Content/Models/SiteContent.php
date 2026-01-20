@@ -50,8 +50,17 @@ final class SiteContent extends Model
 
     /** @use HasFactory<\Database\Factories\SiteContentFactory> */
     use HasFactory;
+
     use HasUuids;
     use SoftDeletes;
+
+    /**
+     * Nazwa factory dla modelu.
+     */
+    protected static function newFactory(): \Database\Factories\SiteContentFactory
+    {
+        return \Database\Factories\SiteContentFactory::new();
+    }
 
     /**
      * Nazwa tabeli.
@@ -109,7 +118,7 @@ final class SiteContent extends Model
     /**
      * Relacja: Dzieci w hierarchii.
      *
-     * @return HasMany<SiteContent>
+     * @return HasMany<SiteContent, $this>
      */
     public function children(): HasMany
     {
