@@ -133,7 +133,6 @@ final class SiteContent extends Model
      */
     public function scopePublished(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
     {
-        /** @var \Illuminate\Database\Eloquent\Builder<static> */
         return $query->where('status', 'published')
             ->where('is_current_version', true)
             ->whereNotNull('published_at')
@@ -148,7 +147,6 @@ final class SiteContent extends Model
      */
     public function scopeCurrentVersion(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
     {
-        /** @var \Illuminate\Database\Eloquent\Builder<static> */
         return $query->where('is_current_version', true);
     }
 
@@ -160,7 +158,6 @@ final class SiteContent extends Model
      */
     public function scopeOfType(\Illuminate\Database\Eloquent\Builder $query, string $type): \Illuminate\Database\Eloquent\Builder
     {
-        /** @var \Illuminate\Database\Eloquent\Builder<static> */
         return $query->where('type', $type);
     }
 

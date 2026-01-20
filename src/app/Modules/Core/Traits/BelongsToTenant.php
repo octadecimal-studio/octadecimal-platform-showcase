@@ -40,15 +40,19 @@ trait BelongsToTenant
 
         // Automatycznie ustaw tenant_id przy tworzeniu
         static::creating(function (Model $model): void {
+            /** @phpstan-ignore-next-line property.notFound */
             if (empty($model->tenant_id)) {
+                /** @phpstan-ignore-next-line property.notFound */
                 $model->tenant_id = static::getCurrentTenantId();
             }
         });
 
         // Zablokuj zmianę tenant_id przy aktualizacji (bezpieczeństwo)
         static::updating(function (Model $model): void {
+            /** @phpstan-ignore-next-line property.notFound */
             if ($model->isDirty('tenant_id')) {
                 // Przywróć oryginalną wartość - zmiana tenant_id jest niedozwolona
+                /** @phpstan-ignore-next-line property.notFound */
                 $model->tenant_id = $model->getOriginal('tenant_id');
             }
         });
@@ -63,7 +67,9 @@ trait BelongsToTenant
         // PHPStan: $this->guarded może być bool lub array, sprawdzamy typ
         $guarded = $this->guarded;
         if (is_array($guarded) && ! in_array('tenant_id', $guarded, true)) {
-            $this->guarded[] = 'tenant_id';
+            // Zamiast $this->guarded[] = 'tenant_id' (problem z PHPStan)
+            // używamy array_merge który zwraca array
+            $this->guarded = array_merge($guarded, ['tenant_id']);
         }
     }
 
