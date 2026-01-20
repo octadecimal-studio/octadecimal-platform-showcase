@@ -1,0 +1,12 @@
+services:
+  slack-mcp-server:
+    build: .
+    container_name: slack-mcp-server
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    # stdio mode - no ports exposed
+    stdin_open: true
+    tty: true
