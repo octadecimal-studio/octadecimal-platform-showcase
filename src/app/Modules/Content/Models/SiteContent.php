@@ -129,17 +129,14 @@ final class SiteContent extends Model
      * Scope: Tylko opublikowane treści.
      *
      * @param  \Illuminate\Database\Eloquent\Builder<static>  $query
-     * @return \Illuminate\Database\Eloquent\Builder<static>
+     * @phpstan-return \Illuminate\Database\Eloquent\Builder<static>
      */
     public function scopePublished(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
     {
-        /** @var \Illuminate\Database\Eloquent\Builder<static> */
-        $result = $query->where('status', 'published')
+        return $query->where('status', 'published')
             ->where('is_current_version', true)
             ->whereNotNull('published_at')
             ->where('published_at', '<=', now());
-
-        return $result;
     }
 
     /**
