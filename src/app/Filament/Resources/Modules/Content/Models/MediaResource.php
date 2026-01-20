@@ -78,13 +78,13 @@ final class MediaResource extends Resource
                             ->label('Szerokość')
                             ->suffix('px')
                             ->disabled()
-                            ->visible(fn (Media $record): bool => $record->isImage()),
+                            ->visible(fn (?Media $record): bool => $record?->isImage() ?? false),
 
                         Forms\Components\TextInput::make('height')
                             ->label('Wysokość')
                             ->suffix('px')
                             ->disabled()
-                            ->visible(fn (Media $record): bool => $record->isImage()),
+                            ->visible(fn (?Media $record): bool => $record?->isImage() ?? false),
                     ])
                     ->columns(2)
                     ->visible(fn (string $operation): bool => $operation === 'edit'),
@@ -139,7 +139,7 @@ final class MediaResource extends Resource
                     ->disk(fn (Media $record): string => $record->disk)
                     ->height(60)
                     ->width(60)
-                    ->visible(fn (Media $record): bool => $record->isImage()),
+                    ->visible(fn (?Media $record): bool => $record?->isImage() ?? false),
 
                 Tables\Columns\TextColumn::make('file_name')
                     ->label('Nazwa pliku')
@@ -218,7 +218,7 @@ final class MediaResource extends Resource
                         $service = app(MediaService::class);
                         $service->optimize($record);
                     })
-                    ->visible(fn (Media $record): bool => $record->isImage()),
+                    ->visible(fn (?Media $record): bool => $record?->isImage() ?? false),
                 Tables\Actions\DeleteAction::make(),
                 Tables\Actions\RestoreAction::make(),
             ])

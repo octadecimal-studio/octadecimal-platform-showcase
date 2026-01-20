@@ -269,7 +269,7 @@ final class SiteContentResource extends Resource
                             'published_at' => now(),
                         ]);
                     })
-                    ->visible(fn (SiteContent $record): bool => $record->status !== 'published'),
+                    ->visible(fn (?SiteContent $record): bool => $record?->status !== 'published'),
                 Tables\Actions\Action::make('archive')
                     ->label('Archiwizuj')
                     ->icon('heroicon-o-archive-box')
@@ -278,7 +278,7 @@ final class SiteContentResource extends Resource
                     ->action(function (SiteContent $record): void {
                         $record->update(['status' => 'archived']);
                     })
-                    ->visible(fn (SiteContent $record): bool => $record->status !== 'archived'),
+                    ->visible(fn (?SiteContent $record): bool => $record?->status !== 'archived'),
                 Tables\Actions\DeleteAction::make(),
                 Tables\Actions\RestoreAction::make(),
             ])
