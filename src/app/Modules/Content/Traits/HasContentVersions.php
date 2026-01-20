@@ -11,13 +11,14 @@ use Illuminate\Support\Facades\Auth;
 
 /**
  * Trait zapewniający wersjonowanie dla modeli.
- *
+ * 
  * Automatycznie tworzy snapshoty modelu przy każdej zmianie.
  *
  * @property-read \Illuminate\Database\Eloquent\Collection<int, ContentVersion> $versions
  * @property-read ContentVersion|null $currentVersion
  *
  * @mixin Model
+ * @phpstan-ignore-next-line trait.unused
  */
 trait HasContentVersions
 {
