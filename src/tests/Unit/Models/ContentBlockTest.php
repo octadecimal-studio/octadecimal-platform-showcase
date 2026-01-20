@@ -43,7 +43,10 @@ final class ContentBlockTest extends TestCase
         ContentBlock::factory()->forTenant($tenant)->create();
         ContentBlock::factory()->forTenant($tenant)->inactive()->create();
 
-        $active = ContentBlock::active()->count();
+        // Wyłącz TenantScope dla testu
+        $active = ContentBlock::withoutGlobalScope(\App\Modules\Core\Scopes\TenantScope::class)
+            ->active()
+            ->count();
 
         $this->assertEquals(1, $active);
     }

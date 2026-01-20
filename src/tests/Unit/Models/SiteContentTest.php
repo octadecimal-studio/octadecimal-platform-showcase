@@ -44,7 +44,10 @@ final class SiteContentTest extends TestCase
         SiteContent::factory()->forTenant($tenant)->create(['status' => 'draft']);
         SiteContent::factory()->forTenant($tenant)->archived()->create();
 
-        $published = SiteContent::published()->count();
+        // Wyłącz TenantScope dla testu
+        $published = SiteContent::withoutGlobalScope(\App\Modules\Core\Scopes\TenantScope::class)
+            ->published()
+            ->count();
 
         $this->assertEquals(1, $published);
     }
