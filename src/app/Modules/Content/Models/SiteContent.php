@@ -133,10 +133,13 @@ final class SiteContent extends Model
      */
     public function scopePublished(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
     {
-        return $query->where('status', 'published')
+        /** @var \Illuminate\Database\Eloquent\Builder<static> */
+        $result = $query->where('status', 'published')
             ->where('is_current_version', true)
             ->whereNotNull('published_at')
             ->where('published_at', '<=', now());
+
+        return $result;
     }
 
     /**
