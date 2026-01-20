@@ -42,6 +42,14 @@ final class Tenant extends Model
     use SoftDeletes;
 
     /**
+     * Nazwa factory dla modelu.
+     */
+    protected static function newFactory(): \Database\Factories\TenantFactory
+    {
+        return \Database\Factories\TenantFactory::new();
+    }
+
+    /**
      * Nazwa tabeli w bazie danych.
      */
     protected $table = 'tenants';
